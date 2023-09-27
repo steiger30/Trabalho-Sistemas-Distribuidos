@@ -22,7 +22,7 @@ services:
       - ./backend/.docker/dbdata:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=pizzaria123
-      - POSTGRES_DB=pizzariaFacul
+      - POSTGRES_DB=projetoPizzaria
   pgadmin:
     image: dpage/pgadmin4
     container_name: pizzaria-pgadmin
