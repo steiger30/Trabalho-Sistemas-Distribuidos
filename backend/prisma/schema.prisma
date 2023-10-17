@@ -9,3 +9,69 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Customer {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  password  String
+  fullName  String
+  address   Address  @relation(fields: [addressId], references: [id])
+  addressId String   @unique
+}
+
+model Address {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  address   String
+  city      String
+  state     String
+  zipCode   String
+  country   String
+  Customer  Customer?
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderNumber Int         @unique @default(autoincrement())
+  discription String?
+  price       Int
+  discount    Float
+  status      String
+  OrderItem   OrderItem[]
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  quantity    Int
+  discription String?
+  Order       Order    @relation(fields: [orderId], references: [id])
+  orderId     String
+  product     Product  @relation(fields: [productId], references: [id])
+  productId   String
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  name        String
+  price       Float
+  discription String
+  discount    Float
+  OrderItem   OrderItem[]
+}
+
+enum OrderStatus {
+  ENVIANDO_PEDIDO
+  PEDIDO_ACEITO
+  PEDIDO_NA_COZINHA
+  PEDIDO_PRONTO
+  SAINDO_PARA_ENTREGA
+}
