@@ -1,9 +1,14 @@
 import { Module } from '@nestjs/common';
-import { CustomerModule } from './customer/customer.module';
-import { OwnerControlModule } from './owner-control/owner-control.module';
+import { ProductModule } from './product/product.module';
+import { OrderModule } from './order/order.module';
+import { OrderItemModule } from './order-item/order-item.module';
+import { CategoryModule } from './category/category.module';
+import { AdminModule } from './admin/admin.module';
+import { AuthModule } from './auth/auth.module';
+
 
 @Module({
-  imports: [CustomerModule, OwnerControlModule,],
+  imports: [ ProductModule, OrderModule, OrderItemModule, CategoryModule, AdminModule, AuthModule],
   controllers: [],
   providers: [],
 })

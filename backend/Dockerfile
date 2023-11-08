@@ -4,8 +4,6 @@ RUN apk add --no-cache bash
 
 RUN npm install -g @nestjs/cli
 
-
-
 WORKDIR /home/app
 
 COPY package*.json ./
