@@ -1,94 +1,58 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/prisma/prisma.service";
 import { UpdateProductDto } from "../dto/update-product.dto";
 import { CreateProductDto } from "../dto/create-product.dto";
-import { NotFoundError } from "rxjs";
 import { Product } from "../entities/product.entity";
-import { Category } from "@prisma/client";
+import { Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
-export class ProducRepository {
-  constructor(private prisma: PrismaService) { }
+export class ProductRepository {
+  constructor(
+    @InjectRepository(Product)
+    private readonly repository: Repository<Product>
+    ) { }
 
   create(createProductDto: CreateProductDto) {
-    const { adminId, categoryId } = createProductDto;
-    const admin = this.prisma.admin.findUnique({ where: { id: adminId } })
 
-    if (!admin) {
-      throw new NotFoundError('Author not found.');
-    }
-    const category = this.prisma.admin.findUnique({ where: { id: categoryId } })
-
-    if (!category) {
-      throw new NotFoundError('Categoy not found.');
-    }
-
-    return this.prisma.product.create({
-      data: createProductDto,
-
-    })
+    return this.repository.save(createProductDto)
   }
 
-  async findAll({ query, skip }: { query: Category; skip: number; }): Promise<Product[] | any > {
-    return this.prisma.product.findMany({
-      take:10,
-      skip:skip,
+  async findAll(query: string, skips: number): Promise<Product[]> {
+    return this.repository.find({
+      take: 10,
+      skip: skips,
       where: {
-        category: query
+        name: query
       },
       select: {
         name: true,
-        category: true,
         price: true,
         description: true,
         image: true,
-        adminId: true,
       },
-      orderBy: {
-        name: 'asc',
-      }
     });
   }
 
-  async findOne(id: string): Promise<Product | any> {
+  async findOne(id: string): Promise<Product> {
 
-  this.prisma.product.findUnique({
+    return this.repository.findOne({
       where: { id },
       select: {
         name: true,
-        category: true,
         price: true,
         description: true,
         image: true,
-        adminId: true,
       }
     });
+
   }
 
   update(id: string, updateProductDto: UpdateProductDto) {
-    const { adminId, categoryId } = updateProductDto;
-    const admin = this.prisma.admin.findUnique({ where: { id: adminId } })
-
-    if (!admin) {
-      throw new NotFoundError('Author not found.');
-    }
-    const category = this.prisma.admin.findUnique({ where: { id: categoryId } })
-
-    if (!category) {
-      throw new NotFoundError('Categoy not found.');
-    }
-
-
-    return this.prisma.product.update({
-      where: { id },
-      data: updateProductDto,
-    })
+    return this.repository.update(id, updateProductDto)
   }
 
   remove(id: string) {
-    return this.prisma.product.delete({
-      where: { id }
-    })
+    return this.repository.delete(id)
   }
 
 }

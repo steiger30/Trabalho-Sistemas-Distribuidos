@@ -1,21 +1,22 @@
 import { Injectable } from "@nestjs/common";
-import { UpdateOrderDto } from "../dto/update-order.dto";
 import { CreateOrderDto } from "../dto/create-order.dto";
-import { PrismaService } from "src/prisma/prisma.service";
+import { Order } from "../entities/order.entity";
+import { Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
+
 
 @Injectable()
 export class OrderRepository {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    @InjectRepository(Order)
+    private repository: Repository<Order>
+    ) { }
 
   create(createOrderDto: CreateOrderDto) {
-    return this.prisma.order.create({
-      data: createOrderDto,
-    });
+    return this.repository.create(createOrderDto);
   }
 
   remove(id: string) {
-    return this.prisma.order.delete({
-      where: { id }
-    })
+    return this.repository.delete(id)
   }
 }

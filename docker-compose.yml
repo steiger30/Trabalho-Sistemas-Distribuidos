@@ -8,10 +8,11 @@ services:
       - 4200:3000  
     volumes:
       - ./backend:/home/app
+      - /home/app/node_modules
     depends_on:
       - db
   db:
-    build: ./bd/.docker/postgress
+    build: ./bd/.docker/postgres
     container_name: pizzaria-db
     restart: always
     tty: true

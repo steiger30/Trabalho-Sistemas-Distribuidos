@@ -8,7 +8,14 @@ WORKDIR /home/app
 
 COPY package*.json ./
 
+RUN npm install bcrypt@5.1.1
+
+RUN rm -rf node_modules
+RUN npm cache clean --force
+RUN npm install -g npm@latest
 RUN npm install
+RUN npm rebuild bcrypt
+
 COPY . .
 
 EXPOSE 3000

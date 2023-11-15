@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ProducRepository } from './repositories/product.repository';
-import { Category } from '@prisma/client';
+import { ProductRepository } from './repositories/product.repository';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly repository: ProducRepository){}
+  constructor(private readonly repository: ProductRepository){}
 
   create(createProductDto: CreateProductDto) {
     return this.repository.create(createProductDto);
   }
 
-  findAll(category: Category, skip: number) {
-    return this.repository.findAll({ query: category, skip });
+  findAll(category: string, skip: number) {
+    return this.repository.findAll( category, skip );
   }
 
   findOne(id: string) {

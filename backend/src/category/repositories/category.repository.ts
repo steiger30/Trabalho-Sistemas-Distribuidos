@@ -1,28 +1,30 @@
 import { Injectable } from "@nestjs/common";
 import { UpdateCategoryDto } from "../dto/update-category.dto";
 import { CreateCategoryDto } from "../dto/create-category.dto";
-import { PrismaService } from "src/prisma/prisma.service";
-
-
+import { Repository } from 'typeorm';
+import { Category } from "../entities/category.entity";
+import { InjectRepository } from "@nestjs/typeorm";
 @Injectable()
 export class CategoryRepository {
-  constructor(private prisma: PrismaService) { }
+
+  constructor(
+    @InjectRepository(Category)
+    private repository: Repository<Category>
+    ) { }
 
   create(createCategoryDto: CreateCategoryDto) {
-    return this.prisma.category.create({ data: createCategoryDto });
+    return this.repository.save(createCategoryDto);
   }
 
   update(id: string, updateCategoryDto: UpdateCategoryDto) {
-    return this.prisma.category.update({ where: { id }, data: updateCategoryDto });
+    return this.repository.update( id, updateCategoryDto);
   }
 
   findAll(){
-    return this.prisma.category.findMany();
+    return this.repository.find();
   }
   
   remove(id: string) {
-    return this.prisma.category.delete({
-      where: { id }
-    })
+    return this.repository.delete( id )
   }
 }

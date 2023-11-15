@@ -1,15 +1,21 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/prisma/prisma.service";
+
 import { CreateOrderItemDto } from "../dto/create-order-item.dto";
+import { Repository } from "typeorm";
+import { OrderItem } from "../entities/order-item.entity";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class OrderItemRepository {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    @InjectRepository(OrderItem)
+    private readonly repository: Repository<OrderItem>
+    ) { }
   create(createOrderItemDto: CreateOrderItemDto) {
-    return this.prisma.orderItem.create({ data: createOrderItemDto });
+    return this.repository.create(createOrderItemDto);
   }
 
   remove(id: string) {
-    return this.prisma.orderItem.delete({where: {id}});
+    return this.repository.delete(id);
   }
 }

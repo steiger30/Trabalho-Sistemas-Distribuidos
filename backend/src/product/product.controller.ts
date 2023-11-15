@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Category } from '@prisma/client';
+import { AuthGuard } from '@nestjs/passport';
 
-@Controller('product')
+@Controller('api/v1/product')
+@UseGuards(AuthGuard('jwt'))
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -14,7 +15,7 @@ export class ProductController {
   }
 
   @Get()
-  findAll(@Param('category') category:Category, @Param('skip') skip: number) {
+  findAll(@Param('category') category: string, @Param('skip') skip: number) {
     return this.productService.findAll(category, +skip);
   }
 

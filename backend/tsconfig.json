@@ -16,10 +16,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
-    "paths": {
-      "@nestjs/*": ["node_modules/@nestjs/*"]
-    }   
+    "noFallthroughCasesInSwitch": false
   },
   "include": [
     "src",
@@ -28,6 +25,5 @@
   "exclude": [
     "dist",
     "node_modules",
-    ".docker"
   ]
 }
