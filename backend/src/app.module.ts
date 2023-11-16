@@ -15,9 +15,9 @@ import { Product } from './product/entities/product.entity';
 import { Admin } from './admin/entities/admin.entity';
 
 
-
 @Module({
   imports: [
+    
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({ type: 'postgres',
     host: process.env.HOST,

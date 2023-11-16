@@ -24,6 +24,7 @@ export class AuthService {
   }
   async validateAdmin(email, password) {
     let adminIsValid: Admin;
+    console.log(email, password)
     try {
       adminIsValid = await this.adminService.findByAdminEmail(email);
    

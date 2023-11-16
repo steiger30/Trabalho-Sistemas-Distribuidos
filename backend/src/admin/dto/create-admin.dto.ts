@@ -13,6 +13,6 @@ export class CreateAdminDto {
   
 
   @IsNotEmpty()
-  @Matches(RegexHelper.password, {message: MessagesHelper.PASSWORD_VALID})
+  // @Matches(RegexHelper.password, {message: MessagesHelper.PASSWORD_VALID})
   password: string;
 }
