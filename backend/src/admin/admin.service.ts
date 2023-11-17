@@ -13,7 +13,7 @@ export class AdminService {
   }
 
 
-  findByAdminEmail(email: string) {
-    return this.repository.findByAdminEmail(email)
+  async findByAdminEmail(email: string) {
+    return await this.repository.findByAdminEmail(email)
   }
 }

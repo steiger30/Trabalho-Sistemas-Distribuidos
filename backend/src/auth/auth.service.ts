@@ -24,13 +24,10 @@ export class AuthService {
   }
   async validateAdmin(email, password) {
     let adminIsValid: Admin;
-    console.log(email, password)
-    try {
-      adminIsValid = await this.adminService.findByAdminEmail(email);
-   
-    } catch (error) {
-      return null;
-    }
+  
+    adminIsValid = await this.adminService.findByAdminEmail(email);
+    if(!adminIsValid) return null;
+    
 
     const isPasswordValid = await adminIsValid.validatePassword(password);;
     if (!isPasswordValid) { return null; }

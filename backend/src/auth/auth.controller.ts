@@ -15,4 +15,8 @@ export class AuthController {
   async singIn(@Req() req: any) {
     return await this.authService.singIn(req.user);
   }
+  @Get()
+  login() {
+    return {"messagem":"olá"};
+  }
 }
