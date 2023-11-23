@@ -21,7 +21,7 @@ Nesta aplicação é possível criar e atualizar o estatus do pedidos.
 ### docker
 
 Primeiramente você deve clonar este repositório em sua máquina local.
-Possuindo docker instalado em sua máquina ([Instalação e Configurar o Docker ](https://docs.docker.com/engine/install/)
+Possuindo docker instalado em sua máquina ([Instalação e Configurar do Docker ](https://docs.docker.com/engine/install/)
 ), execute o seguinte comando:
 ```
 
