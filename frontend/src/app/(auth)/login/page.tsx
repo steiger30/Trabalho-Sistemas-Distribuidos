@@ -1,13 +1,24 @@
 "use client";
 import React, { useEffect, useState } from 'react'
-import LoginCard from '../../../components/login-card/index'
-import C_Button from '@/components/button/index'
+import C_LoginCard from '../../../components/LoginCard'
+import C_Button from '@/components/Button'
 import { Input, Stack } from '@chakra-ui/react'
+import { useRouter } from 'next/navigation';
+import { AuthService } from '@/shared/services/auth.service';
+import { AuthCookieService } from '@/shared/services/auth-cookie.service';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
+
 
 export default function SignupPage() {
+  const { userEmail } = useSelector((state: RootState) => state.auth);
+  const router = useRouter()
+  const [buttonDisabled, setButtonDisabled] = React.useState(true);
+  const [loading, setLoading] = React.useState(false);
+  const [erroLogin, setErroLogin] = React.useState(false);
   const [admin, setAdmin] = useState({
-    password: "admin@Admin1",
-    email: "admin@admin.com"
+    password: "",
+    email: ""
   })
 
   useEffect(() => {
@@ -16,28 +27,40 @@ export default function SignupPage() {
     } else {
       setButtonDisabled(true);
     }
-  }, [admin]);
-
-  const [buttonDisabled, setButtonDisabled] = React.useState(true);
-  const [loading, setLoading] = React.useState(false);
+    if(userEmail){
+      router.push('/dashboard')
+    }
+  }, [admin, userEmail, admin.email.length, admin.password.length, router]);
 
   const onLogin = async () => {
     setLoading(true);
-    console.log(JSON.stringify(admin))
-    const response = await fetch("http://localhost:4200/api/v1/auth/login", {
-      method: "POST",
-      body: JSON.stringify(admin),
-    })
-      .then((response) =>  console.log(response))
-      .then((data) => console.log(data));
-    console.log(response)
-    setLoading(false);
+    try {
+      const res = await AuthService.login({ email: admin.email, password: admin.password })
+
+      if (res.status == 401) {
+        setErroLogin(true);
+        return;
+      }
+      const responseData = await res.json();
+      AuthCookieService.createAccessTokenCookie(responseData.token, responseData.expires_in)
+      router.push('/dashboard')
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
 
   return (
     <div className='flex items-center justify-center w-screen h-screen'>
-      <LoginCard title={"Login"}>
+      <C_LoginCard title={"Login"}>
+        {erroLogin && (
+          <div className="bg-red-600 bg-opacity-20 border-2 border-red-700 py-5 px-5 rounded-lg">
+            <p className="text-sm">E-mail ou senha são inválidos</p>
+          </div>
+        )}
         <Stack spacing={4}>
           <Input
             value={admin.email}
@@ -56,8 +79,8 @@ export default function SignupPage() {
             className='border-slate-600'
             placeholder='Senha' />
         </Stack>
-        <C_Button  onClick={onLogin} isDisabled={buttonDisabled} isLoading={loading} colorScheme='blue' size='lg' width='100%'>Entrar</C_Button>
-      </LoginCard>
+        <C_Button onClick={onLogin} isDisabled={buttonDisabled} isLoading={loading} colorScheme='blue' size='lg' width='100%'>Entrar</C_Button>
+      </C_LoginCard>
     </div>
   )
 }
