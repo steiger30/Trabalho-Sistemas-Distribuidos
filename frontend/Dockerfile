@@ -1,10 +1,11 @@
-FROM node:18-alpine3.18
+FROM node:20-alpine3.17
 
 WORKDIR /home/app
 
 COPY package*.json ./
 
 RUN rm -rf node_modules
+
 RUN npm install
 
 COPY  . .
