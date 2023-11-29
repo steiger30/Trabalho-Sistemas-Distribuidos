@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductRepository } from './repositories/product.repository';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductService {
@@ -11,8 +13,9 @@ export class ProductService {
     return this.repository.create(createProductDto);
   }
 
-  findAll(category: string, skip: number) {
-    return this.repository.findAll( category, skip );
+  findAll(query,page: number) : Promise<Pagination<Product>> {
+    page 
+    return this.repository.findAll(query , page );
   }
 
   findOne(id: string) {

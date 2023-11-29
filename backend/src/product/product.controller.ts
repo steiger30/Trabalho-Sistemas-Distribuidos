@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -15,8 +15,8 @@ export class ProductController {
   }
 
   @Get()
-  findAll(@Param('category') category: string, @Param('skip') skip: number) {
-    return this.productService.findAll(category, +skip);
+  async findAll(@Query('query')query: String, @Query('page') page: number) {
+    return await this.productService.findAll(query, +page);
   }
 
   @Get(':id')

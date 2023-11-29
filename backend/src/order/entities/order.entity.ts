@@ -16,14 +16,14 @@ export class Order {
   @Column({ nullable: false, type: 'varchar', length: 64 })
   nameCustomer: string;
 
+  @Column({ generated: 'increment' })
+  numPedido: number;
+
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.FEITO_PEDIDO, })
   status: OrderStatus;
 
   @Column({ nullable: false, type: 'int', unsigned: true, width: 3 })
   price: number;
-
-  @Column({ nullable: false, type: 'varchar', length: 64 })
-  codigoOrder: string;
 
   @Column({ nullable: true, type: 'varchar', length: 120 })
   discription: string;
@@ -33,6 +33,5 @@ export class Order {
   
   @ManyToMany(() => OrderItem, orderItem => orderItem.order)
   orderItem: OrderItem[]
-
 
 }

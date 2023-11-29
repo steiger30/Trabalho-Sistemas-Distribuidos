@@ -20,7 +20,7 @@ import { ConfigModule } from '@nestjs/config';
     TypeOrmModule.forFeature([Admin]),
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY|| 'secret',
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '2 days' },
     }),
   ],
   controllers: [AuthController],

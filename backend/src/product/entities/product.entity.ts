@@ -1,5 +1,4 @@
 import { Admin } from "src/admin/entities/admin.entity";
-import { Category } from "src/category/entities/category.entity";
 import { OrderItem } from "src/order-item/entities/order-item.entity";
 import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -17,9 +16,6 @@ export class Product {
   @Column({ nullable: true, type: 'varchar', length: 120 })
   description: string;
 
-  @Column({ nullable: true, type: 'varchar', length: 120 })
-  image: string;
-
   @CreateDateColumn()
   createdAt: Date;
 
@@ -29,10 +25,6 @@ export class Product {
   @ManyToOne(() => Admin, admin => admin.product )
   admin: Admin; 
 
-
-  @ManyToOne(() => Category, category => category.product )
-  category: Category;
-  
   @ManyToMany(() => OrderItem, orderItem => orderItem.product)
   orderItem: OrderItem[]; 
 }

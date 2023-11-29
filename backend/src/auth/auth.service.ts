@@ -20,6 +20,7 @@ export class AuthService {
 
     return {
       token: this.jwtService.sign(payload),
+      expires_in: 2,
     };
   }
   async validateAdmin(email, password) {
