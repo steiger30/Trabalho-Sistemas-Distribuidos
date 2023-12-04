@@ -15,6 +15,9 @@ const config: Config = {
       },
       colors: {
         'primary': '#3182ce',
+      },
+      width: {
+        '420': '420px',
       }
     },
   },

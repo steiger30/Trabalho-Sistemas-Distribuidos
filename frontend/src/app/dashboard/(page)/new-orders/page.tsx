@@ -1,92 +1,64 @@
 'use client'
 import { useEffect, useState } from 'react'
 import {
-  Progress,
   Box,
   ButtonGroup,
   Button,
   Heading,
   Flex,
   FormControl,
-  GridItem,
   FormLabel,
   Input,
-  SimpleGrid,
-  InputLeftAddon,
-  InputGroup,
-  Textarea,
-  FormHelperText,
-  InputRightElement,
-  IconButton,
-  ScaleFade,
-  Collapse,
-  TableContainer,
-  Table,
-  TableCaption,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Td,
-  Tfoot,
+  Text,
+  Stack,
+  StackDivider,
+  FormErrorMessage,
+  useToast,
 } from '@chakra-ui/react'
 import AsyncSelect from 'react-select/async';
-import { useToast } from '@chakra-ui/react'
 import { ApiFactory } from '@/shared/factory/api-cliente.factory'
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { ProductSchema } from '@/shared/schemas/product.schema';
+import { Card, CardHeader, CardBody, CardFooter } from '@chakra-ui/react'
+import ContainerArticle from '../../components/ContainerArticle';
 import { OrderSchema } from '@/shared/schemas/order.schema';
-import { AddIcon, MinusIcon } from '@chakra-ui/icons';
-import C_Button from '@/components/Button';
+import { formatCurrencyBRL } from '@/shared/types/format-currency';
+import { Option, OrderSelect, Producto } from './types';
+import C_ModalOrder from '../../components/ModalOrder';
+import { useRouter } from 'next/navigation';
+
 
 const Form1 = () => {
-  const [show, setShow] = useState(false)
-  const handleClick = () => setShow(!show)
-  return (
-    <>
-      <Heading w="100%" textAlign={'center'} fontWeight="normal" mb="2%">
-        Novo Pedido
-      </Heading>
-      <Flex>
-        <FormControl mr="5%">
-          <FormLabel htmlFor="nameCustomer" fontWeight={'normal'}>
-            Nome Cliente
-          </FormLabel>
-          <Input />
-        </FormControl>
+  const toast = useToast();
+  const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [totalPriceOrder, settotalPiceOrder] = useState(0);
+  const [orderSelect, setOrderSelect] = useState<{
+    productId: string;
+    description: string;
+    name: string;
+    quantity: number;
+    price: number;
+    totalPrice: number;
+  }>();
 
-      </Flex>
-      <FormControl mt="2%">
-        <FormLabel htmlFor="email" fontWeight={'normal'}>
-          Descrição
-        </FormLabel>
-        <Input />
-      </FormControl>
-    </>
-  )
-}
+  const [listOrder, setListOrder] = useState<{
+    productId: string;
+    description: string;
+    name: string;
+    quantity: number;
+    price: number;
+    totalPrice: number;
+  }[]>([]);
 
+  useEffect(() => {
+    if(listOrder.length > 0){
 
-type Option = {
-  value: string,
-  label: string,
-  description: string
-}
+      sumPriceOrder()
+    }
+  }, [listOrder]);
 
-type Produto = {
-  id: string,
-  name: string,
-  description: string
-}
-
-const Form2 = () => {
-  const [inputSearch, setInputSearch] = useState('');
-  const [dataProdcut, setDataProdcut] = useState(false)
-  const [quantityProdcut, setQuantityProdcut] = useState(0)
-
-
-  const { register, handleSubmit, getValues, setValue, reset, formState: { errors }, } = useForm({
+  const { reset, handleSubmit, register, formState: { errors }, } = useForm({
     resolver: yupResolver(OrderSchema),
 
   });
@@ -95,10 +67,12 @@ const Form2 = () => {
     try {
       let response = await ApiFactory().getPagination(`product?query=${inputValue}&page=1`);
       if (response != null) {
-        const options = response.items.map((produto: Produto): Option => ({
-          value: produto.id,
-          label: produto.name,
-          description: produto.description
+
+        const options = response.items.map((producto: Producto): Option => ({
+          value: producto.id,
+          label: producto.name,
+          description: producto.description,
+          price: producto.price
         }));
         return options;
       }
@@ -110,179 +84,188 @@ const Form2 = () => {
   };
 
   const setValueForm = (selectedOption: any) => {
-    setDataProdcut(false)
-    console.log(selectedOption)
-    setValue("name", selectedOption.label);
-    setValue("description", selectedOption.description);
-    setValue("productId", selectedOption.value);
-    setDataProdcut(true)
+    setOrderSelect({
+      name: selectedOption.label,
+      description: selectedOption.description,
+      productId: selectedOption.value,
+      price: selectedOption.price,
+      totalPrice: selectedOption.totalPrice,
+      quantity: 1
+    })
+    openModal();
+  }
 
+  const addProductOrders = (data: OrderSelect) => {
+    setListOrder((prevList: any) => [...prevList, data]);
+    console.log(data);
+    closeModal();
+    setOrderSelect({
+      name: '',
+      description: '',
+      productId: '',
+      price: 0,
+      totalPrice: 0,
+      quantity: 1
+    })
+  }
+
+  const removeOrder = (produRemove: OrderSelect) => {
+
+    let index = listOrder.findIndex(item => item.productId === produRemove.productId || item.quantity === produRemove.quantity);
+
+    if (index !== -1) {
+      const newListOrder = [...listOrder];
+
+      newListOrder.splice(index, 1);
+
+      setListOrder(newListOrder);
+    }
+  }
+
+
+  const onSubmit = async (data: any) => {
+    console.log('Dados do primeiro formulário:', data);
+    const { nameCustomer, description } = data
+    try {
+      const response = await ApiFactory().post('order', { nameCustomer: nameCustomer, description: description, items: listOrder })
+      isToast('success', "Pedido feito com sucesso");
+      console.log(response)
+      setListOrder([])
+      reset()
+      router.push('/dashboard');
+    } catch (error) {
+      isToast('error', "Erro ao fazer Pedido");
+      console.log(error);
+    }
+
+  };
+  function isToast(isStatus: any, message: string) {
+    toast({ status: isStatus, description: message, position: 'top-right', duration: 1000, isClosable: false, });
+  }
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  function sumPriceOrder() {
+    const totalPriceArray = listOrder.map(order => order.totalPrice);
+
+    console.log(totalPriceArray)
+    const totalPrice = totalPriceArray.reduce((acc, item) => {
+      return acc + item;
+    })
+    settotalPiceOrder(totalPrice);
   }
 
   return (
-    <>
-      <Heading w="100%" textAlign={'center'} fontWeight="normal" mb="2%">
-        Adicionar Produto
+    <ContainerArticle>
+      <Heading w="100%" textAlign={'center'} fontWeight="normal" mt="20px" mb="50px">
+        Novo Pedido
       </Heading>
-      <FormControl as={GridItem} colSpan={[6, 3]}>
-        <AsyncSelect
-          cacheOptions
-          onChange={(selectedOption) => {
-            setValueForm(selectedOption);
-          }}
-          loadOptions={(inputValue: any, callback: any) =>
-            getAllProduct(inputValue)}
-        />
+      <form onSubmit={handleSubmit(onSubmit)} className='flex flex-wrap w-full items-start justify-between'>
+        <Box className='flex flex-col gap-5 w-full md:w-1/3'>
+          <FormControl isInvalid={!!errors.nameCustomer?.message}>
+            <FormLabel htmlFor="nameCustomer" fontWeight={'normal'}>
+              Nome Cliente
+            </FormLabel>
+            <Input  {...register("nameCustomer")} />
+            {errors.nameCustomer?.message ? (
+              <FormErrorMessage>{errors.nameCustomer?.message}</FormErrorMessage>
+            ) : ''}
+          </FormControl>
+          <FormControl isInvalid={!!errors.description?.message}>
+            <FormLabel htmlFor="email" fontWeight={'normal'}>
+              Descrição
+            </FormLabel>
+            <Input  {...register("description")} />
+            {errors.description?.message ? (
+              <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
+            ) : ''}
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor="email" fontWeight={'normal'}>
+              Descrição
+            </FormLabel>
+            <AsyncSelect
+              cacheOptions
+              onChange={(selectedOption) => {
+                setValueForm(selectedOption);
+
+              }}
+              loadOptions={(inputValue: any, callback: any) =>
+                getAllProduct(inputValue)}
+            />
+          </FormControl>
+          {
+            orderSelect ?
+              (
+                <C_ModalOrder onClose={closeModal} active={isModalOpen} addProductOrders={addProductOrders} data={orderSelect}></C_ModalOrder>
+              ) : ""
+          }
+        </Box>
+
+
         {
-          dataProdcut ?
+          listOrder.length > 0 ?
             (
-              <Collapse startingHeight={20} in={dataProdcut} >
-                <Box
-                  p='40px'
-                  mt='4'
-                  bg='blue.100'
-                  rounded='md'
-                  className='flex gap-2 mt-7 bg-opacity-0'>
-                  <FormControl  >
-                    <Input style={{ opacity: "inherit", borderColor: "white" }} className='opacity-100' isDisabled {...register('name')} />
-                  </FormControl>
-                  <Input style={{ opacity: "inherit", borderColor: "white" }} isDisabled {...register('description')} />
+              <Card size={"md"} h={445} className='w-full mt-8 md:w-420 md:mt-0'>
+                <CardHeader>
+                  <Heading size='md'>Pedidos</Heading>
+                </CardHeader>
+                <CardBody maxH="270px" overflowY="auto">
+                  <Stack divider={<StackDivider />} spacing='4'>
+                    {
+                      listOrder.map((data) => (
+                        <Box key={data.productId}>
+                          <div className='flex justify-between items-center pb-2'>
+                            <Text fontSize='md'>{data.quantity}x {data.name}</Text>
+                            <Text fontSize='md'>{formatCurrencyBRL(data.price * data.quantity)}</Text>
+                          </div>
+                          <div className='flex items-center  gap-3'>
+                            <Button onClick={() => removeOrder(data)} size='sm' colorScheme='red' variant='ghost'>
+                              Remover
+                            </Button>
+                          </div>
+                        </Box>
+                      ))
+                    }
+                  </Stack>
 
-                  <div className='flex items-center'>
-                    <IconButton
-                      colorScheme="blue"
-                      variant="outline"
-                      aria-label='Search database'
-                      icon={<MinusIcon />}
+                </CardBody>
 
-                    />
-                    <span className='px-4 text-xl'>
-                      {quantityProdcut}
-                    </span>
-                    <IconButton colorScheme="blue"
-                      variant="outline" aria-label='Search database' icon={<AddIcon />} />
-                  </div>
-                  <div>
-                    <C_Button colorScheme='blue'>Adicionar</C_Button>
-                  </div>
-                </Box>
-              </Collapse>
-
-            ) : (
-              <div></div>
+                <CardFooter className='flex flex-col'>
+                  <Text className='flex justify-between'><span className='font-bold'>Total</span><span className='font-bold'>{formatCurrencyBRL(totalPriceOrder)}</span></Text>
+                  <ButtonGroup mt="5%" w="100%">
+                    <Flex w="100%" justifyContent='flex-end'>
+                      <Button
+                        type="submit"
+                        w="100%"
+                        colorScheme="red"
+                        variant="solid"
+                      >
+                        Fazer Pedido
+                      </Button>
+                    </Flex>
+                  </ButtonGroup>
+                </CardFooter>
+              </Card>
             )
+            :
+            <Card size={"md"} h={445} className='w-full mt-8 md:w-420 md:mt-0'>
+              <CardBody display="flex" alignItems="center" justifyContent='center' >
+                <Text>Adicione itens</Text>
+              </CardBody>
+            </Card>
         }
+      </form>
 
-        <TableContainer className='mt-10'>
-          <Table variant='simple'>
-            <Thead>
-              <Tr>
-                <Th>Produto</Th>
-                <Th isNumeric>Preço</Th>
-                <Th></Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr>
-                <Td>inches</Td>
-                <Td isNumeric>25.4</Td>
-                <Td isNumeric><button>oi</button></Td>
-              </Tr>
-            </Tbody>
-            <Tfoot>
-              <Tr>
-                <Th></Th>
-                <Th></Th>
-                <Th isNumeric>Total: 100.00</Th>
-              </Tr>
-            </Tfoot>
-          </Table>
-        </TableContainer>
 
-      </FormControl>
-    </>
+    </ContainerArticle >
   )
 }
 
-const Form3 = () => {
-  return (
-    <>
-      <Heading w="100%" textAlign={'center'} fontWeight="normal">
-        Social Handles
-      </Heading>
-
-    </>
-  )
-}
-
-export default function Multistep() {
-  const toast = useToast()
-  const [step, setStep] = useState(1)
-  const [progress, setProgress] = useState(33.33)
-
-  return (
-    <>
-      <Box
-        borderWidth="1px"
-        rounded="lg"
-        shadow="1px 1px 3px rgba(0,0,0,0.3)"
-        maxWidth={800}
-        p={6}
-        m="10px auto"
-        as="form">
-        <Progress hasStripe value={progress} mb="5%" mx="5%" isAnimated></Progress>
-        {step === 1 ? <Form1 /> :  <Form2 />  }
-        <ButtonGroup mt="5%" w="100%">
-          <Flex w="100%" justifyContent="space-between">
-            <Flex>
-              <Button
-                onClick={() => {
-                  setStep(step - 1)
-                  setProgress(progress - 50)
-                }}
-                isDisabled={step === 1}
-                colorScheme="blue"
-                variant="solid"
-                w="7rem"
-                mr="5%">
-                Back
-              </Button>
-              <Button
-                w="7rem"
-                isDisabled={step === 2}
-                onClick={() => {
-                  setStep(step + 1)
-                  if (step === 2) {
-                    setProgress(100)
-                  } else {
-                    setProgress(progress + 50)
-                  }
-                }}
-                colorScheme="blue"
-                variant="outline">
-                Next
-              </Button>
-            </Flex>
-            {step === 2 ? (
-              <Button
-                w="7rem"
-                colorScheme="red"
-                variant="solid"
-                onClick={() => {
-                  toast({
-                    title: 'Account created.',
-                    description: "We've created your account for you.",
-                    status: 'success',
-                    duration: 3000,
-                    isClosable: true,
-                  })
-                }}>
-                Submit
-              </Button>
-            ) : null}
-          </Flex>
-        </ButtonGroup>
-      </Box>
-    </>
-  )
-}
+export default Form1

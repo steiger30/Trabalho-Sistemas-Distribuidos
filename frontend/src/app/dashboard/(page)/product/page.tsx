@@ -27,7 +27,6 @@ export default function Product() {
   const getAllProduct = async () => {
     try {
       let response = await ApiFactory().getPagination(`product?query&page=${itemOffset}`);
-
       if (response != null) {
         setTotalPages(response.meta.totalPages)
         setPageProdcut(response.items);

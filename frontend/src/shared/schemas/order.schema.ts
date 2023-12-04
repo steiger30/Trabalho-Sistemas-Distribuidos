@@ -1,8 +1,7 @@
 import * as yup from 'yup';
 
 export const OrderSchema = yup.object().shape({
-  name: yup.string(),
+  nameCustomer: yup.string().required("obrigatorio"),
   description: yup.string(),
-  quantity: yup.number(),
-  productId: yup.string(),
+  
 });
