@@ -12,8 +12,8 @@ export class OrderRepository {
     private repository: Repository<Order>
     ) { }
 
-  create(createOrderDto: CreateOrderDto) {
-    return this.repository.create(createOrderDto);
+  create(createOrderDto: any) {
+    return this.repository.save(createOrderDto);
   }
 
   remove(id: string) {

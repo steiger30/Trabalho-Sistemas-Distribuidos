@@ -1,7 +1,9 @@
 import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { OrderItem } from "src/order-item/entities/order-item.entity";
+import { OrderItem } from "./order-item.entity";
+
 
 enum OrderStatus {
+  
   FEITO_PEDIDO = 'FEITO_PEDIDO',
   PEDIDO_NA_COZINHA = 'PEDIDO_NA_COZINHA',
   PEDIDO_PRONTO = 'PEDIDO_PRONTO',
@@ -19,10 +21,10 @@ export class Order {
   @Column({ generated: 'increment' })
   numPedido: number;
 
-  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.FEITO_PEDIDO, })
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.FEITO_PEDIDO  })
   status: OrderStatus;
 
-  @Column({ nullable: false, type: 'int', unsigned: true, width: 3 })
+  @Column({ nullable: false, type: 'int', unsigned: true})
   price: number;
 
   @Column({ nullable: true, type: 'varchar', length: 120 })

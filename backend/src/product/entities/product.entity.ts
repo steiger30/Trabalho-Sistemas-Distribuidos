@@ -1,5 +1,5 @@
 import { Admin } from "src/admin/entities/admin.entity";
-import { OrderItem } from "src/order-item/entities/order-item.entity";
+import { OrderItem } from "src/order/entities/order-item.entity";
 import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()

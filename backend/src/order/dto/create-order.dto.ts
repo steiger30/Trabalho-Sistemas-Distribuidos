@@ -1,4 +1,6 @@
-import { IsNotEmpty, Length } from "class-validator";
+import { IsNotEmpty, IsNumber, Length, MaxLength } from "class-validator";
+import { CreateOrderItemDto } from "./create-order-item.dto";
+
 
 enum OrderStatus {
   FEITO_PEDIDO = 'FEITO_PEDIDO',
@@ -8,16 +10,17 @@ enum OrderStatus {
 }
 
 export class CreateOrderDto {
-  @IsNotEmpty()
+ 
+
   nameCustomer: string;
 
-  @IsNotEmpty()
   status: OrderStatus;
 
-  @IsNotEmpty()
   price: number;
-    @Length(0, 128, { message: 'Nome precisa ter entre 3 e 10 caracteres' })
+
 
   discription?: string;
 
+  @IsNotEmpty()
+  items: CreateOrderItemDto[];
 }
